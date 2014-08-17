@@ -6,27 +6,21 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [kata-potter.core :as kata]))
 
-; (deftest a-test
-  ; (testing "FIXME, I fail."
-    ; (is (= 0 1))))
+(deftest grab-a-set
+  (is (= (kata/grab-a-set {1 1 2 2} 2) #{1 2}))
+  (is (= (kata/grab-a-set {1 1} 2) nil)))
 
-(deftest cost
-  (testing "a book costs 8"
-    (is (= (kata/cost ["a book"]) 8)))
-  (testing "two of the same book cost 16"
-    (is (= (kata/cost ["a book" "a book"]) 16))))
+(defn decimalize [x]
+  (into #{} (map #(int (* 10 %)) x)))
 
 (deftest possible-totals
-  (is (= (kata/possible-totals {1 2}) #{16.0}))
-  (is (= (kata/possible-totals {1 1, 2 1}) #{15.20, 16.0}))
-  (is (= (kata/possible-totals {1 2, 2 2}) #{32.0, 30.40}))
-  (is (= (kata/possible-totals {1 1, 2 1, 3 1, 4 1}) #{32.0 30.4 29.6 25.6})))
+  (is (= (decimalize (kata/possible-totals {1 2})) #{160}))
+  (is (= (decimalize (kata/possible-totals {1 1, 2 1})) #{152, 160}))
+  (is (= (decimalize (kata/possible-totals {1 2, 2 2})) #{320, 304}))
+  (is (= (decimalize (kata/possible-totals {1 1, 2 1, 3 1, 4 1})) #{320 304 296 256}))
+  (is (= (decimalize (kata/possible-totals {1 2, 2 2, 3 2, 4 2})) #{640 608 584 512}))
+  (is (= (decimalize (kata/possible-totals {1 2, 2 2, 3 2, 4 1, 5 1})) #{512 640 516 584 616})))
 
-(defn no-dups? [coll]
-  (= (-> coll set count)
-     (count coll)))
-
-(defspec two-distinct-books-discount
-  100
-  (prop/for-all [books (gen/such-that no-dups? (gen/vector gen/int) 100)]
-                (= (kata/cost books) 15.20)))
+(deftest cost
+  (is (= (kata/cost [8]) 8.0))
+  (is (= (kata/cost [1 1 2 2 3 3 4 5]) (float 51.2))))
